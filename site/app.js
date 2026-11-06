@@ -125,7 +125,6 @@ const state = {
   seasonYear: "avg",
   seasonMode: "index",
   stackMode: "share",
-  ecoMode: "share",
 };
 
 const dashboard = document.querySelector("#dashboard");
@@ -441,16 +440,26 @@ function renderSeasonChart() {
     </div>`;
 }
 
+const ECO_KEYS = ["nuclear_mwh", "hydro_mwh", "wind_mwh", "other_renewables_mwh"];
+const NON_ECO_KEYS = ["natural_gas_mwh", "dual_fuel_mwh", "other_fossil_mwh"];
+
+function groupMwh(row, keys) {
+  return keys.reduce((sum, key) => sum + row[key], 0);
+}
+
 function renderEco() {
-  const rows = YEARS.map((year) => {
+  const yearly = YEARS.map((year) => {
     const sums = totals(rowsFor(String(year), "all", null));
-    const ecoMwh = ["nuclear_mwh", "hydro_mwh", "wind_mwh", "other_renewables_mwh"].reduce((sum, key) => sum + sums[key], 0);
-    const nonMwh = ["natural_gas_mwh", "dual_fuel_mwh", "other_fossil_mwh"].reduce((sum, key) => sum + sums[key], 0);
-    const eco = pct(ecoMwh, sums.total_mwh);
-    const non = pct(nonMwh, sums.total_mwh);
-    return { year, eco, non };
+    const ecoMwh = groupMwh(sums, ECO_KEYS);
+    const nonMwh = groupMwh(sums, NON_ECO_KEYS);
+    return {
+      year,
+      eco: pct(ecoMwh, sums.total_mwh),
+      non: pct(nonMwh, sums.total_mwh),
+    };
   });
-  const bars = rows
+  const change = (yearly[2].eco - yearly[0].eco).toFixed(2);
+  const bars = yearly
     .map((row) => `
       <div class="eco-row">
         <span class="eco-year">${row.year}</span>
@@ -461,13 +470,13 @@ function renderEco() {
       </div>`)
     .join("");
   return `
-    <section class="panel" aria-label="Eco versus non-eco share">
+    <section class="panel" id="eco" aria-label="Eco versus non-eco share">
       <h2>Eco vs non-eco share of New York generation</h2>
-      <p class="chart-note">Eco fell from ${rows[0].eco.toFixed(2)}% in 2023 to ${rows[2].eco.toFixed(2)}% in 2025. Non-eco rose from ${rows[0].non.toFixed(2)}% to ${rows[2].non.toFixed(2)}%.</p>
+      <p class="chart-note">Eco share changed ${change} percentage points from 2023 to 2025, even though Wind and Other Renewables grew.</p>
       <div class="eco-chart">${bars}</div>
       <div class="legend">
-        <span class="legend-key"><span class="swatch eco-swatch"></span>Eco: nuclear, hydro, wind, other renewables</span>
-        <span class="legend-key"><span class="swatch non-swatch"></span>Non-eco: natural gas, dual fuel, other fossil</span>
+        <span class="legend-key"><span class="swatch eco-swatch"></span>Eco (Nuclear, Hydro, Wind, Other Renewables)</span>
+        <span class="legend-key"><span class="swatch non-swatch"></span>Non-eco (Natural Gas, Dual Fuel, Other Fossil)</span>
       </div>
     </section>`;
 }
@@ -513,7 +522,7 @@ function renderMonthStack() {
   }).join("");
   const modeOptions = options([["share", "% share"], ["twh", "TWh"]], state.stackMode);
   return `
-    <section class="panel" aria-label="All 36 months stacked by fuel">
+    <section class="panel" id="months" aria-label="All 36 months stacked by fuel">
       <div class="section-head">
         <div>
           <h2>All 36 months, stacked by fuel</h2>
@@ -534,7 +543,7 @@ function renderFindings() {
   const windPressed = state.fuel === "wind_mwh";
   const otherPressed = state.fuel === "other_renewables_mwh";
   return `
-    <section class="panel" aria-label="Findings">
+    <section class="panel" id="findings" aria-label="Findings">
       <h2>Findings</h2>
       <div class="findings">
         <button type="button" class="finding" data-action="finding" data-value="wind_mwh" aria-pressed="${windPressed}">
@@ -557,7 +566,7 @@ function render() {
   dashboard.innerHTML = `
     ${renderToolbar()}
     ${renderStats(sums)}
-    <div class="layout">
+    <div class="layout" id="mix">
       ${renderBars(sums)}
       ${renderDetail(sums)}
     </div>
@@ -632,6 +641,27 @@ dashboard.addEventListener("click", (event) => {
   if (!target || target.tagName === "SELECT") return;
   applyAction(target.dataset.action, target.dataset.value);
 });
+
+const themeButton = document.querySelector("#theme-toggle");
+
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  localStorage.setItem("ny-theme", theme);
+  const meta = document.querySelector('meta[name="color-scheme"]');
+  if (meta) meta.content = theme;
+  if (!themeButton) return;
+  const showingDark = theme === "dark";
+  themeButton.textContent = showingDark ? "Light mode" : "Dark mode";
+  themeButton.setAttribute("aria-pressed", showingDark ? "false" : "true");
+}
+
+applyTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
+if (themeButton) {
+  themeButton.addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+    applyTheme(next);
+  });
+}
 
 const mismatches = ROWS.filter((row) => {
   const sum = FUELS.reduce((total, fuel) => total + row[fuel.key], 0);

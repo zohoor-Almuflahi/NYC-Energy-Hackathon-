@@ -3,7 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
     <title>Wind and Other Renewables, New York 2023–2025</title>
+    <script>
+      (function () {
+        var theme = localStorage.getItem("ny-theme") === "light" ? "light" : "dark";
+        document.documentElement.dataset.theme = theme;
+        document.querySelector('meta[name="color-scheme"]').content = theme;
+      })();
+    </script>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -13,12 +21,15 @@
           <span class="brand-mark" aria-hidden="true"><span></span><span></span></span>
           NY Energy Mix · Use Case 1
         </div>
-        <div class="nav-links">
-          <a href="#mix">Mix</a>
-          <a href="#months">36 months</a>
-          <a href="#findings">Findings</a>
-          <a href="#eco">Eco</a>
-          <a href="#proposal">Proposal</a>
+        <div class="nav-end">
+          <div class="nav-links">
+            <a href="#mix">Mix</a>
+            <a href="#months">36 months</a>
+            <a href="#findings">Findings</a>
+            <a href="#eco">Eco</a>
+            <a href="#proposal">Proposal</a>
+          </div>
+          <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false">Light mode</button>
         </div>
       </nav>
       <p class="eyebrow">New York generation by fuel · NYISO data · 2023 to 2025</p>

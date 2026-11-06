@@ -1,15 +1,33 @@
 :root {
+  --bg: #101820;
+  --card: #1b2430;
+  --ink: #e7eef6;
+  --muted: #9aabbd;
+  --line: #314052;
+  --accent: #8eb6f5;
+  --accent-ink: #0e1622;
+  --accent-soft: #24344c;
+  --warn: #f0a07a;
+  --good: #5dce96;
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
   --bg: #eef2f6;
   --card: #ffffff;
   --ink: #172033;
   --muted: #5b6b7c;
   --line: #d5dee8;
   --accent: #1f4b99;
+  --accent-ink: #ffffff;
   --accent-soft: #e7eef8;
   --warn: #9a3412;
   --good: #0f6b4c;
   color-scheme: light;
 }
+
+html[data-theme="light"] .other-word { color: #008300; }
+html[data-theme="light"] .brand-mark span:last-child { background: #008300; }
 
 * { box-sizing: border-box; }
 
@@ -56,7 +74,7 @@ button, select { font: inherit; color: inherit; }
 }
 
 .brand-mark span:first-child { background: #e87ba4; }
-.brand-mark span:last-child { background: #008300; }
+.brand-mark span:last-child { background: #4cbe62; }
 
 .nav-links { display: flex; flex-wrap: wrap; gap: 2px 16px; }
 
@@ -68,6 +86,23 @@ button, select { font: inherit; color: inherit; }
 }
 
 .nav-links a:hover { color: var(--accent); }
+
+.nav-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.theme-toggle {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 999px;
+  min-height: 36px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
 
 .eyebrow {
   margin: 0;
@@ -82,13 +117,13 @@ h1, h2, h3 { font-weight: 650; letter-spacing: 0; }
 
 h1 {
   margin: 10px 0 0;
-  max-width: 18ch;
+  max-width: 16em;
   font-size: clamp(1.8rem, 4.2vw, 2.6rem);
   line-height: 1.12;
 }
 
 .wind-word { color: #e87ba4; }
-.other-word { color: #008300; }
+.other-word { color: #4cbe62; }
 
 .lede {
   margin: 14px 0 0;
@@ -106,7 +141,7 @@ h1 {
   padding: 0 18px;
   border-radius: 999px;
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-ink);
   text-decoration: none;
   font-weight: 650;
 }
@@ -123,7 +158,7 @@ h1 {
   scroll-margin-top: 16px;
 }
 
-.site-proposal h2 { max-width: 28ch; }
+.site-proposal h2 { max-width: 24em; }
 
 .site-proposal p { margin: 0; max-width: 72ch; line-height: 1.5; }
 
@@ -215,7 +250,7 @@ select:focus-visible, button:focus-visible, .pie-slice:focus-visible {
 
 .pie { width: 100%; height: auto; display: block; }
 
-.pie path { stroke: #ffffff; stroke-width: 2; }
+.pie path { stroke: var(--card); stroke-width: 2; }
 
 .pie text {
   font-size: 8px;
@@ -227,8 +262,6 @@ select:focus-visible, button:focus-visible, .pie-slice:focus-visible {
 .pie-slice { cursor: pointer; }
 
 .pie-slice.dim { opacity: 0.35; }
-
-.pie-slice[aria-pressed="true"] path { stroke: var(--ink); stroke-width: 2.5; }
 
 .pie-legend { display: flex; flex-direction: column; }
 
@@ -318,11 +351,11 @@ select:focus-visible, button:focus-visible, .pie-slice:focus-visible {
 
 .legend-button[aria-pressed="true"] {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-ink);
   border-color: var(--accent);
 }
 
-.legend-button[aria-pressed="true"] .swatch { box-shadow: 0 0 0 1px #fff; }
+.legend-button[aria-pressed="true"] .swatch { box-shadow: 0 0 0 1px var(--accent-ink); }
 
 .chart-block { margin-top: 16px; }
 
@@ -348,6 +381,37 @@ select:focus-visible, button:focus-visible, .pie-slice:focus-visible {
   stroke-dasharray: 5 5;
   stroke-width: 1.5;
 }
+
+.eco-chart { display: flex; flex-direction: column; gap: 10px; margin: 12px 0; }
+
+.eco-row {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.eco-year { font-weight: 650; }
+
+.eco-bar {
+  display: flex;
+  height: 46px;
+  gap: 2px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.eco-part, .non-part {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 650;
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.eco-part { background: #1baf7a; color: #083322; }
+.non-part { background: #4b5563; color: #ffffff; }
 
 .eco-swatch { background: #1baf7a; }
 .non-swatch { background: #4b5563; }
@@ -440,4 +504,5 @@ select:focus-visible, button:focus-visible, .pie-slice:focus-visible {
   .stats, .findings { grid-template-columns: 1fr; }
   .pie-wrap { grid-template-columns: 1fr; }
   .site-header, main, .site-proposal { width: min(1080px, calc(100% - 20px)); }
+  .eco-part, .non-part { font-size: 0.75rem; }
 }
