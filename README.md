@@ -1,182 +1,141 @@
 # New York's Energy Mix
 
-Where does New York's electricity come from, and how does that mix change over time?
+Wind and other renewables grew in New York from 2023 to 2025, and they peak in opposite halves of the year. The fossil share still rose.
 
-We have three years of real generation data from the New York Independent System Operator (NYISO), the organization that runs the state's power grid: January 1, 2023 through December 31, 2025. In about five hours we turn it into a visual tool and explain what it shows.
+**[Open the demo](https://zohoor-almuflahi.github.io/NYC-Energy-Hackathon-/)**
 
-New York's climate law calls for 70% renewable electricity by 2030 and a zero-emission grid by 2040. The first step is seeing where power comes from today and how fast that is changing.
+That link is the site. A teammate can review the whole dashboard from there. The page covers generation inside New York, January 2023 through December 2025, from NYISO's real-time fuel mix.
 
-No website, live feed, or API is required. A working spreadsheet chart is a complete Minimum entry.
+## Walk the demo
 
-## What we turn in
+Use the links at the top of the site, in this order:
 
-- Each fuel's share of generation, in percent
-- At least one clear, working visualization
-- Two findings, each with a number behind it
-- A demo of about three minutes
+1. **Mix.** The circle chart is the 2025 fuel share. The Year, Season, and Fuel menus change the slice and the detail panel. Numbers can show percent or TWh.
+2. **36 months.** Every month from January 2023 to December 2025, stacked by fuel. Switch between % share and TWh. Fossil fuels sit at the bottom and the other fuels sit on top.
+3. **Findings.** Wind grew from 3.7% to 5.3%. Other renewables grew from 1.8% to 2.3%. The line chart shows they peak in opposite halves of the year.
+4. **Eco.** Three yearly bars. Eco is nuclear, hydro, wind, and other renewables. Non-eco is natural gas, dual fuel, and other fossil.
+5. **Proposal.** Expand transmission, including projects like Segment A, so more of that renewable output reaches demand instead of being curtailed.
 
-Finish the Minimum deliverable first. Move up only after that chart works.
+**Light mode** in the top bar switches the page to a light theme. It switches back to dark the same way.
 
-## Five hours
+## What we built
 
-Get the Minimum chart working by 1:30, then level up.
+This is an Intermediate entry: one interactive dashboard, past the single chart the Minimum level asks for. We did not build the Advanced emissions scenarios.
 
-| When | What |
+The site is a static page in `site/`. It has no server and no live feed. `site/app.js` holds the 36 monthly rows from `data/nyiso_fuel_mix_monthly_2023_2025.csv`, so the charts open as soon as the page loads.
+
+| On the page | What it answers |
 | --- | --- |
-| 0:00–0:30 | Kickoff. Open the monthly file and see the columns. |
-| 0:30–1:30 | Build the Minimum chart. |
-| **1:30** | **Checkpoint: the chart works.** |
-| 1:30–3:45 | Intermediate or Advanced, only if Minimum is done. |
-| 3:45–4:30 | Write the findings and clean the chart. |
-| 4:30–5:00 | Rehearse the demo. |
+| Summary cards | Total generation, largest source, fossil share, renewable share (hydro + wind + other renewables) |
+| Circle chart and fuel menu | Each fuel's share, with a short description and the same fuel in 2023, 2024, and 2025 |
+| 36-month stack | How the mix moves month to month, in % share or TWh |
+| Findings and season chart | The two required observations, plus the seasonal complement |
+| Eco bars | Whether the zero-carbon share rose with wind and other renewables |
+| Proposal | The decision this could support: move more of that output to where it is used |
 
-Split the work so nobody waits on anyone else.
+Fuel colors are the same on the circle chart and the 36-month stack: dual fuel, natural gas, nuclear, hydro, wind, other renewables, and other fossil.
 
-| Role | Owns |
+## Findings
+
+Each finding names a number from the monthly file.
+
+**Wind grew from 3.7% to 5.3%.** 3.7% in 2023 (4.68 TWh), 4.7% in 2024 (6.12 TWh), 5.3% in 2025 (7.12 TWh).
+
+**Other renewables grew from 1.8% to 2.3%.** 1.8% in 2023 (2.23 TWh), 2.1% in 2024 (2.75 TWh), 2.3% in 2025 (3.02 TWh). Other renewables here are other grid-connected renewables, including utility-scale solar and biomass.
+
+**They peak in opposite halves of the year.** On the season chart, Index 100 is that source's own average month. Wind is stronger than its own average in the colder months. Other renewables are stronger than their own average in the warmer months. GWh per day shows the actual amounts. The chart can show the three-year average or a single year.
+
+**Eco share still fell.** Eco is nuclear + hydro + wind + other renewables. Non-eco is natural gas + dual fuel + other fossil.
+
+| Year | Generation | Eco | Non-eco | Fossil | Renewable (hydro + wind + other) | Largest source |
+| --- | --- | --- | --- | --- | --- | --- |
+| 2023 | 125.00 TWh | 49.33% | 50.67% | 50.7% | 27.3% | Dual fuel, 27.3% |
+| 2024 | 130.72 TWh | 48.18% | 51.82% | 51.8% | 27.4% | Dual fuel, 27.0% |
+| 2025 | 133.16 TWh | 47.22% | 52.78% | 52.8% | 25.8% | Dual fuel, 27.5% (36.67 TWh) |
+
+Eco share changed −2.11 percentage points from 2023 to 2025, even though wind and other renewables grew. Nuclear is in Eco and is not counted in the renewable-share card.
+
+## How we did it
+
+We started from the hackathon question: where does New York's electricity come from, and how is the mix changing? We used the monthly file, 36 rows, one row per month. Every fuel column in those rows adds up to `total_mwh`.
+
+Share for a fuel, a year, or a group of fuels is:
+
+`share = fuel MWh ÷ total MWh × 100`
+
+The seven fuel shares in a year add to 100%. The dashboard shows the result as a percent and as TWh. It does not print the division on the page. 1,000,000 MWh = 1 TWh.
+
+The season chart compares months of different lengths. For each month, the daily rate is MWh ÷ days in that month. The index is that rate divided by the unweighted average of the twelve monthly rates, times 100. The three-year line is the average of the three yearly indexes.
+
+Eco and non-eco use the same MWh totals. The yearly bars are those two groups as a share of that year's generation.
+
+GitHub Pages publishes the `site` folder on every push to `main`. The workflow is `.github/workflows/pages.yml`.
+
+We did not use the daily file, the hourly profile, or the emissions factors. Those stay available for a later pass. This demo does not estimate CO₂ and does not run a what-if scenario.
+
+## Challenge criteria
+
+The brief asked for a visual tool and a short demo. This is where the dashboard sits against that ask.
+
+| The brief asked for | Where it is |
 | --- | --- |
-| Data lead | Loading the files, totals, and % calculations. Checks that shares add to 100%. |
-| Visualization lead | Charts, labels, colors, and filters. |
-| Analyst | The story: comparisons, extremes, the two observations, and emissions math. |
-| Presenter | The 3-minute script and the clock. Joins whichever role is behind. |
+| Each fuel's share of generation, in percent | Circle chart, fuel menu, and 36-month stack in % share |
+| At least one clear, working visualization | The demo link above |
+| Two findings, each with a number | Wind 3.7% → 5.3%, and other renewables 1.8% → 2.3% |
+| A demo of about three minutes | The walk-through below |
+| Data source and time period on the work | Page heading: NYISO data, 2023 to 2025 |
+| Interactive comparisons, after the first chart works | Year, season, fuel, percent or TWh, and the 36-month stack |
 
-A team of three can merge Analyst and Presenter. Use a tool the team already knows: Excel or Google Sheets, Python or R, or Power BI, Tableau, or Looker Studio. All of them can reach Advanced.
-
-## Choose a level
-
-| Level | Project | You must deliver | Best data file |
-| --- | --- | --- | --- |
-| Minimum | Basic energy mix chart | One working chart of % generation by fuel; percentage calculations shown; two observations; a brief demo | Monthly |
-| Intermediate | Interactive energy dashboard | Charts or filters that compare months, seasons, days, or hours, and explain what changes | Daily + hourly profile |
-| Advanced | Energy mix and emissions analyzer | Estimated CO₂ using the supplied factors, plus at least one what-if scenario comparing mixes | Monthly or daily + emissions factors |
-
-## The data
-
-Every one of the 26,304 hours has a reading for every fuel. The files are cleaned and open in Excel or Google Sheets. The full column list is in `Data_Dictionary.docx`.
-
-| File | Rows | One row is | Use it for |
-| --- | --- | --- | --- |
-| `nyiso_fuel_mix_monthly_2023_2025.csv` | 36 | one month | Shares by year or month. Start here. |
-| `nyiso_fuel_mix_daily_2023_2025.csv` | 1,096 | one day | Seasons, weekdays vs weekends, extreme days |
-| `nyiso_hourly_profile_by_month_2023_2025.csv` | 864 | one hour of an average day in a month | How the mix shifts from night to evening peak |
-| `emissions_factors.csv` | 7 | one fuel | Advanced CO₂ estimates |
-
-**Units.** NYISO measures power in MW (megawatts, a rate) and energy in MWh (megawatt-hours, an amount). 1 MW running for 1 hour = 1 MWh. Daily and monthly files are in MWh. The hourly profile is average MW. 1,000 MWh = 1 GWh. 1,000,000 MWh = 1 TWh. New York's grid generated about 133 TWh in 2025.
-
-| Fuel | What it is | Fossil? |
+| What judges weigh | Weight | How this project answers it |
 | --- | --- | --- |
-| Dual Fuel | Plants that burn natural gas and can switch to oil. Mostly New York City and Long Island. | Yes |
-| Natural Gas | Plants that burn only gas, from combined-cycle units to peakers. | Yes |
-| Nuclear | Nine Mile Point, FitzPatrick, and Ginna, all upstate. | No |
-| Hydro | Dams, led by NYPA's Niagara and St. Lawrence–FDR projects. | No |
-| Wind | Grid-connected wind farms. | No |
-| Other Renewables | Other grid-connected renewables, such as utility-scale solar and biomass. | No |
-| Other Fossil Fuels | Oil or kerosene units. Usually under 1%. | Yes |
-
-State these limits in the demo:
-
-- The data is generation inside New York. Imports from Canada, New England, PJM, and other neighbors are outside it.
-- Rooftop and other behind-the-meter solar are outside it, so solar's real contribution is larger than "Other Renewables" shows.
-- Say "generated in New York." Generation and consumption are different things.
-
-## How we build it
-
-### Minimum: basic energy mix chart
-
-1. Open `nyiso_fuel_mix_monthly_2023_2025.csv` and keep the 12 rows for one year.
-2. Sum each fuel column for that year's MWh, then sum those for the year's total.
-3. Share = fuel MWh ÷ total MWh × 100. The seven shares add to 100%.
-4. Chart the shares. A sorted bar chart is easier to read than a pie with seven slices. Label each bar with its %.
-5. Repeat for the other two years and compare.
-6. Write two observations. Each one names a number and says what it means.
-
-### Intermediate: interactive dashboard
-
-Keep the Minimum chart, then add at least two ways to explore:
-
-- A stacked bar of all 36 months, with a switch between TWh and % share
-- A filter for year, season, or fuel
-- The average day for a summer month vs a spring month, from the hourly profile, showing which plants ramp up for the evening peak
-- Weekday vs weekend fossil share, from the daily file (`is_weekend`)
-- The days with the highest and lowest fossil share, and what was happening then
-
-### Advanced: mix and emissions
-
-1. Join `emissions_factors.csv` to the totals on the `fuel_column` names.
-2. Estimate CO₂ for each year and month.
-3. Carbon intensity = tonnes CO₂ ÷ MWh generated.
-4. Build at least one scenario that moves energy between sources, and compare it to the actual year.
-5. Report a range from the low and high factors.
-
-```
-CO₂ (tonnes) = Σ (fuel MWh × fuel emissions factor in tCO₂/MWh)
-```
-
-| Fuel | Low | Central | High | Central assumes |
-| --- | --- | --- | --- | --- |
-| Natural Gas | 0.399 | 0.399 | 0.581 | Gas in a combined-cycle plant (7,535 Btu/kWh) |
-| Dual Fuel | 0.399 | 0.545 | 0.765 | Gas in an older steam plant (10,293 Btu/kWh) |
-| Other Fossil Fuels | 0.765 | 0.765 | 0.975 | Distillate oil in a steam plant (10,319 Btu/kWh) |
-| Nuclear, Hydro, Wind, Other Renewables | 0 | 0 | 0 | No combustion emissions |
-
-Factors are tonnes of CO₂ per MWh. They combine EIA CO₂ per unit of heat with EIA 2025 average heat rates. With the central factors, New York's grid emitted about 33.5 million tonnes in 2025, or 0.251 t per MWh. Check our math against that.
-
-These are assumptions, not measurements. Real plant emissions depend on which units ran, how efficiently, and whether dual-fuel plants burned oil. Say that in the demo, and show how the answer moves between the low and high factors.
-
-Scenario ideas, each moving energy from one source to another at that source's average factor:
-
-- 10 TWh of new wind replaces dual-fuel generation
-- A nuclear unit producing about 8 TWh a year retires and natural gas fills the gap
-- A wet year adds 4 TWh of hydro and cuts the same amount of gas
-
-A yearly swap is a simplification. Real grids balance supply and demand hour by hour. Treat the result as an order-of-magnitude estimate.
-
-## Three-minute demo
-
-Cover, in this order:
-
-1. The question we asked
-2. The data we used
-3. The chart, live
-4. Two or more findings
-5. One limitation of the analysis
-
-| Criterion | Weight | What judges look for |
-| --- | --- | --- |
-| Data & Technical Execution | 30% | Accurate analysis, sound method, sensible assumptions, technical rigor |
-| Visualization & Insights | 20% | Clear charts, insights visible at a glance, the right chart type, a dashboard someone can use |
-| Demo & Storytelling | 20% | A clear story, plain language, inside the time limit |
-| Innovation, AI & Automation | 15% | Creative analytics, AI, machine learning, or automation of loading and processing |
-| Potential Business Impact | 15% | Practical value, a real decision this could support, room to scale |
+| Data and technical execution | 30% | Shares come from the monthly MWh totals. Fuel columns match `total_mwh` in all 36 months. Months of different length are compared as a daily rate. |
+| Visualization and insights | 20% | One page: the mix, the 36 months, the two findings, the seasonal complement, and the eco bars. |
+| Demo and storytelling | 20% | The story is that wind and other renewables grew and cover different seasons, while the eco share fell. The script below fits in three minutes. |
+| Innovation, AI, and automation | 15% | The page calculates every share and chart from the 36 rows when it loads. Filters update the mix without a new file. |
+| Potential business impact | 15% | The proposal is to expand transmission, including projects like Segment A, so more renewable output reaches demand instead of being curtailed. |
 
 Before we present:
 
-- [ ] One working visualization
-- [ ] Percentage calculations shown, adding to 100%
-- [ ] Two observations, each with a number
-- [ ] Data source and time period stated on the chart or slide
-- [ ] Advanced only: emissions factors and their range stated
+- [x] One working visualization
+- [x] Shares calculated from MWh, and the seven fuels add to 100%
+- [x] Two observations, each with a number
+- [x] Data source and time period stated on the page
+- [ ] Advanced only: emissions factors and a what-if range. We did not take this level.
 
-## If we get stuck
+## Three-minute demo
 
-Each of these has a real answer in the data:
+1. **Question.** Where does New York's power come from, and are the fastest-growing renewable sources making the mix cleaner?
+2. **Data.** NYISO generation inside New York, monthly, 2023 through 2025. Open the demo.
+3. **Chart.** Show the 2025 circle. Dual fuel is the largest slice, 27.5%. Switch the 36-month chart between % share and TWh.
+4. **Findings.** Wind 3.7% to 5.3%. Other renewables 1.8% to 2.3%. On the season chart, they peak in opposite halves of the year. Then the eco bars: 49.33% in 2023 to 47.22% in 2025.
+5. **Limit.** This is generation inside New York. Imports are outside the file, and so is rooftop solar. The proposal is to expand transmission so more of the wind and other-renewable output is delivered.
 
-- Which single source is largest? How much do natural gas and dual fuel supply together?
-- Wind grew every year from 2023 to 2025. Did the zero-carbon share grow with it? If not, which source fell?
-- Which month has the highest fossil share, and why would that month need more gas?
-- Nuclear output is flat most of the year and drops for a few weeks in spring and fall. What causes those dips?
-- How different is a hot July afternoon from a mild April afternoon, hour by hour?
-- Are weekends cleaner than weekdays? By how much?
+## Limits to say out loud
 
-## Checks before we trust a number
+- The data is generation inside New York. Imports from Canada, New England, PJM, and other neighbors are outside it.
+- Rooftop and other behind-the-meter solar are outside it, so solar's real contribution is larger than "Other renewables" shows.
+- Say "generated in New York." Generation and consumption are different things.
+- Eco includes nuclear. The renewable-share card does not.
 
-- Keep the hourly profile (average MW) separate from the daily and monthly files (MWh).
-- Seven shares add to 100%. A miss usually means a fuel column was left out, or the total used the wrong rows.
-- Compare months with % shares or a daily average. February has fewer days than July.
-- Label the chart as generation inside New York. Imports are outside this dataset.
-- Use a sorted bar chart. Seven pie slices are hard to compare.
+## Files
+
+| Path | What it is |
+| --- | --- |
+| `site/index.html` | Page, title, navigation, and proposal |
+| `site/app.js` | The 36 months and every chart |
+| `site/styles.css` | Dark theme, light theme, and layout |
+| `data/nyiso_fuel_mix_monthly_2023_2025.csv` | Source table: 36 rows, MWh |
+| `.github/workflows/pages.yml` | Publishes `site/` to GitHub Pages |
+
+To run the same page on your own computer, from the `site` folder:
+
+```bash
+python3 -m http.server 8000
+```
+
+Then open `http://localhost:8000`. That address only works on the computer running the command. Teammates should use the demo link at the top.
 
 ## Sources
 
-- NYISO real-time fuel mix, report P-63: the 5-minute data behind every file in the kit
-- EIA carbon dioxide emissions coefficients: CO₂ per million Btu by fuel
-- EIA average heat rates by prime mover and fuel: Btu per kWh by plant type (2025 values used)
+- NYISO real-time fuel mix, report P-63, aggregated to months for January 2023 through December 2025
+- New York's climate targets for context: 70% renewable electricity by 2030 and a zero-emission grid by 2040
